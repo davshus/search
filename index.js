@@ -1,52 +1,63 @@
 'use strict';
 const readline = require('readline');
 const chalk = require('chalk');
-// const rl = readline.createInterface({
-//   input: process.stdin,
-//   output: process.stdout
-// });
-var list = [];
-var action = "compose";
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+rl.setPrompt(chalk.magenta.dim('Enter a search item: '));
+var getQuery = false;
 var unique = (input) => input.toLowerCase().split("").reduce((a, b) => a + (a.indexOf(b) == -1 ? b : ""), "");
 var funcs = {
-  compose: function(input) {
-    list.push(input);
+  _list: [],
+  register: function(input) {
+    this._list.push(input);
   },
   search: function(regex) {
     let direct = regex;
     let loose = regex.toLowerCase()
       .split("")
       .reduce((a, b) => a == '' ? '(' + b + ')' : a + '[^' + b + ']*(' + b + ')', '') + '.*';
-    // list.forEach((curr, ind, arr) => {
-    //   if (curr.match(loose)) console.log(curr.split('').map(k => regex.toLowerCase().indexOf(k) != -1 ? chalk.green.bold(k) : k).join(''));
-    // });
-
-    for (let i = 0; i < list.length; i++) {
-      let currMatchLetterInd = 1;
-      let currMatch = list[i].match(loose);
-      if (!currMatch) continue;
-      for (let j = 0; j < list[i].length; j++) {
-        if (list[i][j] == currMatch[currMatchLetterInd]) {
-          list[i] = list[i].substring(0, j) + chalk.green.bold(list[i][j]) + list[i].substring(j + 1, list[i].length);
-          currMatchLetterInd++;
-          if (currMatchLetterInd == currMatch.length) break;
+    let directMatches = [], looseMatches = [];
+    for (let i = 0; i < this._list.length; i++) {
+      let directMatch = this._list[i].match(direct), looseMatch = this._list[i].match(loose);
+      if (directMatch) {
+        directMatches.push(this._list[i].substring(0, directMatch.index)
+          + chalk.green.bold(this._list[i].substring(directMatch.index, directMatch.index + directMatch[0].length))
+          + this._list[i].substring(directMatch.index + directMatch[0].length));
+      } else if (looseMatch) {
+        if (!looseMatch) continue;
+        let looseMatchLetterInd = 1, matchBuilder = '';
+        for (let j = looseMatch.index; j < this._list[i].length; j++) {
+          if (this._list[i][j] == looseMatch[looseMatchLetterInd]) {
+            matchBuilder += chalk.green.bold(this._list[i][j]);
+            looseMatchLetterInd++;
+            if (looseMatchLetterInd == looseMatch.length) {
+              matchBuilder += this._list[i].substring(j + 1);
+              break;
+            }
+          } else matchBuilder += this._list[i][j];
         }
+        looseMatches.push(matchBuilder);
       }
-      console.log(list[i]);
     }
-    // let directMatches = [], looseMatches = [];
-    // list.forEach((curr, ind, arr) => {
-    //   if (curr.match(direct)) directMatches.push(curr);
-    //   else if (curr.match(loose)) looseMatches.push(curr);
-    // });
+    let returnMatches = directMatches;
+    returnMatches.push.apply(returnMatches, looseMatches);
+    return returnMatches;
   }
 };
-funcs.compose('bubbles');
-funcs.compose('bubbleskl');
-funcs.compose('bjufdfbbkjles');
-console.log(funcs.search('bubbles'));
-// rl.on('line', (input) => {
-//   switch (action) {
-//     case "compose":
-//   }
-// });
+console.log(chalk.blue('Enter \'\\\' to search.'));
+rl.prompt();
+rl.on('line', (input) => {
+  if (getQuery) {
+    funcs.search(input).forEach((i) => console.log(chalk.blue.bold('RESULT: '), i));
+    rl.setPrompt(chalk.magenta.dim('Enter a search item: '))
+    getQuery = false;
+  } else if (input == '\\') {
+    getQuery = true;
+    rl.setPrompt(chalk.magenta.dim('Enter a search query: '));
+  } else {
+    funcs.register(input);
+  }
+  rl.prompt();
+});
