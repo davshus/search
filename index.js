@@ -2,6 +2,7 @@
 const readline = require('readline');
 const chalk = require('chalk');
 const search = require('./search');
+search.setHighlight(chalk.green.bold);
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
