@@ -8,10 +8,10 @@ module.exports = {
     this._list.push(input);
   },
   query: function(regex) {
-    let direct = regex;
+    let direct = regex.toLowerCase().split('').map((i) => '[' + i + i.toUpperCase() + ']').join('');
     let loose = regex.toLowerCase()
       .split("")
-      .reduce((a, b) => a == '' ? '(' + b + ')' : a + '[^' + b + ']*(' + b + ')', '') + '.*';
+      .reduce((a, b) => a == '' ? '([' + b + b.toUpperCase() + '])' : a + '[^' + b + b.toUpperCase() + ']*([' + b + b.toUpperCase() + '])', '') + '.*';
     let directMatches = [], looseMatches = [];
     for (let i = 0; i < this._list.length; i++) {
       let directMatch = this._list[i].match(direct), looseMatch = this._list[i].match(loose);
