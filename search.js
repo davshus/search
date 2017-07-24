@@ -44,6 +44,9 @@ module.exports = {
     returnMatches.push.apply(returnMatches, looseMatches);
     return returnMatches;
   },
+  setRegister: function(reg) {
+    this._list = reg;
+  }
   clear: function () {
     this._list = [];
   },
