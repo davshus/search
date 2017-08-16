@@ -7,6 +7,7 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
+console.log('test');
 rl.setPrompt(chalk.magenta.dim('Enter a search item: '));
 var getQuery = false;
 console.log(chalk.blue('Enter \'\\\' to search.'));
